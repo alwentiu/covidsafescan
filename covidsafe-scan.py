@@ -65,7 +65,7 @@ for dev in devices:
        logging.info(mnf_desc + " = " +  mnf_val)
        logging.info(svc_desc + " = " +  svc_val)
        p = Peripheral(dev)
-       p.setMTU(256)
+       p.setMTU(512)
        c=p.getCharacteristics(1,0xffff,uuid)
        s=(c[0].read()).decode("utf-8")
        logging.info("Payload: " + s)
