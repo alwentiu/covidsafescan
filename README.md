@@ -8,6 +8,7 @@ This script scans for phones running the Australian COVIDSafe app and displays t
 This has been tested in Ubuntu 18.04 LTS, running the Bluez protocol stack. It uses the bluepy python library. You may need to install the bluepy library. Here is a short instruction; for details see [https://github.com/IanHarvey/bluepy](https://github.com/IanHarvey/bluepy):
 
 > sudo apt install python3-pip libglib2.0-dev
+
 > sudo pip3 install bluepy
 
 ## Running the script
@@ -15,6 +16,7 @@ This has been tested in Ubuntu 18.04 LTS, running the Bluez protocol stack. It u
 You may want to run the setup.sh script first to turn on bluetooth and change some settings of the bluetooth daemon. I find that setting the 'privacy' option on (which will randomise the MAC addresses of the scanning device) makes the scanner works more reliably. This setup needs to be done only once per scanning session. 
 
 > chmod a+x setup.sh
+
 > sudo ./setup.sh
 
 The actual scanner is in the covidsafe-scan.py script. To run the script:
