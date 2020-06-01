@@ -42,6 +42,13 @@ The default RSSI threshold (roughly, signal strength of the bluetooth devices to
 
 sets the threshold to -70 dBm. 
 
+#### MTU size
+
+The default MTU (Maximum Transmission Unit) is set to 512, which is the maximum allowed length. You can set it to a smaller value if you experiencing issues with unreliable payload download. For example,
+
+>sudo python3 covidsafe-scan.py --mtu 256
+
+sets the MTU to 256. 
 
 ## Limitation
 

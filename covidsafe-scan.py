@@ -21,6 +21,7 @@ class ScanDelegate(DefaultDelegate):
 parser = argparse.ArgumentParser()
 parser.add_argument('--timeout', dest='tm', type=int, default=15, help='scanner timeout in seconds')
 parser.add_argument('--rssi', dest='rssi', type=int, default=-85, help='RSSI threshold (default -85 dBm)')
+parser.add_argument('--mtu', dest='mtu', type=int, default=512, help='MTU (default 512)')
 
 args = parser.parse_args()
 
@@ -65,7 +66,7 @@ for dev in devices:
        logging.info(mnf_desc + " = " +  mnf_val)
        logging.info(svc_desc + " = " +  svc_val)
        p = Peripheral(dev)
-       p.setMTU(512)
+       p.setMTU(args.mtu)
        c=p.getCharacteristics(1,0xffff,uuid)
        s=(c[0].read()).decode("utf-8")
        logging.info("Payload: " + s)
