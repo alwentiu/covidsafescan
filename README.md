@@ -27,6 +27,12 @@ The output of the scan will be displayed on the screen and also saved to the fil
 
 ## Options
 
+### Decode payload
+To receive the payload in **payload.csv** in hex, and, for v.1.0.18, deomposed into its component parts
+(public key y, public key x, counter, ciphertext, HMAC), use:
+
+> sudo python3 covidsafe-scan.py --decodepayload
+
 ### Scanning timemout
 
 If you see a scan error message, you may want to increase the scan timeout (the default is 15 seconds). For example, to increase the timeout to 30 seconds, use the following command:

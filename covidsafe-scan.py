@@ -9,6 +9,26 @@ from bluepy.btle import *
 from bluepy.btle import BTLEException, BTLEDisconnectError
 import json
 from datetime import datetime
+import base64
+import binascii 
+
+# Separate components of v2 message payload for writing into csv file.
+def decodepayload(msgstring, versionNum) :
+  hexstring = base64.b64decode(msgstring).hex()
+
+  if(versionNum == 2) :
+    # first check min possible length
+    if(len(hexstring) < 166) : 
+      print("Error decoding v2 payload: msg too short.\n")
+    else :
+    # Comma-separate 1-byte pubkey y (compressed), 32-byte pubkey x, 2-byte counter, 
+    # >= 16-byte ciphertext, 16-byte HMAC
+      hexstring = hexstring[0:2]+","+hexstring[2:66]+","+hexstring[66:70]+","\
+                  +hexstring[70:-32]+","+hexstring[-32:]
+  elif(versionNum != 1) :
+    print("Error decoding payload: don't recognise version "+versionNum+"\n") 
+
+  return hexstring+"\n"
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
@@ -24,6 +44,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--timeout', dest='tm', type=int, default=15, help='scanner timeout in seconds')
 parser.add_argument('--rssi', dest='rssi', type=int, default=-85, help='RSSI threshold (default -85 dBm)')
 parser.add_argument('--mtu', dest='mtu', type=int, default=512, help='MTU (default 512)')
+parser.add_argument("--decodepayload", help="separate v2 msg parts in payload.csv",
+                    action="store_true")
 
 args = parser.parse_args()
 
@@ -82,12 +104,15 @@ with open("payload.csv", "a") as pf:
        # Columns: timestamp, device address, device type, rssi, model, version, message
        row=ts+","+dev.addr + "," + dev.addrType + "," + str(dev.rssi) 
        row=row+","+j['modelP']+","+ str(j['v'])
-       row=row+","+j['msg'].replace("\/","/").replace("\n","") + "\n"
+       if(args.decodepayload) :
+         msgstring = decodepayload(j['msg'], j['v']) 
+       else :
+         msgstring=j['msg'].replace("\/","/").replace("\n","") 
+       row=row+","+msgstring+"\n"
        pf.write(row)
        logging.info("Payload: \n" + s)
        p.disconnect()
    except BTLEException:
      logging.info("Error connecting to or reading from device " + dev.addr)
      
-
 
