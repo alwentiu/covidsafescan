@@ -7,6 +7,7 @@ import logging
 import argparse
 from bluepy.btle import *
 from bluepy.btle import BTLEException
+import codecs 
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
@@ -28,7 +29,6 @@ args = parser.parse_args()
 logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s %(levelname)-8s %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
         filename='covidsafe.log',
         filemode='a')
 
@@ -69,7 +69,8 @@ for dev in devices:
        p.setMTU(args.mtu)
        c=p.getCharacteristics(1,0xffff,uuid)
        s=(c[0].read()).decode("utf-8")
-       logging.info("Payload: " + s)
+       s=codecs.decode(s, 'unicode-escape')
+       logging.info("Payload: \n" + s)
        p.disconnect()
   except:
     logging.info("Error connecting or reading from device " + dev.addr)
