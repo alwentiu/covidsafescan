@@ -18,7 +18,7 @@ def decodepayload(msgstring, versionNum) :
 
   if(versionNum == 2) :
     # first check min possible length
-    if(len(hexstring) < 166) : 
+    if(len(hexstring) < 134) : 
       print("Error decoding v2 payload: msg too short.\n")
     else :
     # Comma-separate 1-byte pubkey y (compressed), 32-byte pubkey x, 2-byte counter, 
