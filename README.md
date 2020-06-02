@@ -23,7 +23,7 @@ The actual scanner is in the covidsafe-scan.py script. To run the script:
 
 > sudo python3 covidsafe-scan.py
 
-The output of the scan will be displayed on the screen and also saved to the file 'covidsafe.log'. 
+The output of the scan will be displayed on the screen and also saved to the file **covidsafe.log**. The payload of the scan is saved to the file **payload.csv**.
 
 ## Options
 
@@ -52,7 +52,7 @@ sets the MTU to 256.
 
 ## Limitation
 
-This scanner can detect Android version of COVIDSafe either in the foreground or in the background. But for the iOS version, it works reliably only when the app is running in the foreground.
+This scanner can detect the Android version of COVIDSafe either in the foreground or in the background. But for the iOS version, it works reliably only when the app is running in the foreground.
 
 It has been tested for COVIDSafe Android up to v1.0.18, and COVIDSafe iOS up to v1.4.
 

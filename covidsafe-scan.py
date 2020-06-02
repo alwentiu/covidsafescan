@@ -6,8 +6,9 @@
 import logging
 import argparse
 from bluepy.btle import *
-from bluepy.btle import BTLEException
-import codecs 
+from bluepy.btle import BTLEException, BTLEDisconnectError
+import json
+from datetime import datetime
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
@@ -37,13 +38,18 @@ console.setLevel(logging.INFO)
 console.setFormatter(logging.Formatter('%(message)s'))
 logging.getLogger('').addHandler(console)
 
-try: 
-  print("Scanning (timeout " + str(args.tm) + " seconds, RSSI threshold: " + str(args.rssi) + ")")
-  scanner = Scanner().withDelegate(ScanDelegate())
-  devices = scanner.scan(args.tm)
-except:
-  print("Scan error. Try increase the timeout and retry")
-  exit()
+print("Scanning (timeout " + str(args.tm) + " seconds, RSSI threshold: " + str(args.rssi) + ")")
+scanner = Scanner().withDelegate(ScanDelegate())
+fail=True
+while fail:
+  try:
+    devices = scanner.scan(args.tm)
+    fail=False
+  except BTLEDisconnectError:
+    print("Device disconnected. Retrying... (Ctrl-C to cancel)\n")
+  except:
+    print("Scan error")
+    exit()
 
 # COVIDSafe advertises its service using the following UUID
 uuid="b82ab3fc-1595-4f6a-80f0-fe094cc218f9"
@@ -51,11 +57,12 @@ uuid="b82ab3fc-1595-4f6a-80f0-fe094cc218f9"
 # see https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/ 
 # for the numeric code used in getDescription/getValueText
 
-for dev in devices:
-  try:
-    svc_val=dev.getValueText(7)
-    svc_desc=dev.getDescription(7)
-    if(svc_val == uuid and dev.rssi >= args.rssi):
+with open("payload.csv", "a") as pf:
+  for dev in devices:
+   try:
+     svc_val=dev.getValueText(7)
+     svc_desc=dev.getDescription(7)
+     if(svc_val == uuid and dev.rssi >= args.rssi):
        logging.info("===============================================================")
        logging.info("Device " + dev.addr + " (" + dev.addrType + "), RSSI=" + str(dev.rssi) + " dB")
        nm_desc = dev.getDescription(9)
@@ -69,10 +76,18 @@ for dev in devices:
        p.setMTU(args.mtu)
        c=p.getCharacteristics(1,0xffff,uuid)
        s=(c[0].read()).decode("utf-8")
-       s=codecs.decode(s, 'unicode-escape')
+       j=json.loads(s)
+       ts=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+       # Save to payload.csv
+       # Columns: timestamp, device address, device type, rssi, model, version, message
+       row=ts+","+dev.addr + "," + dev.addrType + "," + str(dev.rssi) 
+       row=row+","+j['modelP']+","+ str(j['v'])
+       row=row+","+j['msg'].replace("\/","/").replace("\n","") + "\n"
+       pf.write(row)
        logging.info("Payload: \n" + s)
        p.disconnect()
-  except:
-    logging.info("Error connecting or reading from device " + dev.addr)
+   except BTLEException:
+     logging.info("Error connecting to or reading from device " + dev.addr)
+     
 
 
